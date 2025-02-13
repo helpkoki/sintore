@@ -1,0 +1,277 @@
+:root {
+  --main-bg-color: #f8f9fc;
+  --sidebar-bg-color: #C1CE61;
+  --sidebar-hover-color: #CDE042;
+  --topbar-bg-color: #C1CE61;
+  --title-color: #333333;
+  --table-bg-color: #ffffff;
+  --table-header-bg-color: #D7DF21;
+  --table-hover-bg-color: #f1f1f1;
+  --text-color-white: grey;
+  --font-family-main: Arial, sans-serif;
+  --font-size-main: 16px;
+  --font-size-title: 24px;
+  --font-size-profile: 14px;
+  --shadow-box: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.error {
+  color: #ff0001;
+}
+
+.logo {
+  position: absolute;
+  width: 80px;
+  height: 70px;
+  border-radius: 50%;
+  margin-right: 10px;
+  left: 1%;
+  top: 80%;
+ margin-top: -70px;
+ 
+}
+
+#active {
+  margin-bottom: 200px;
+}
+
+.top-header {
+
+  display: flex;
+  width: 80%;
+  margin: 50px ;
+  text-align: center;
+  padding-left: 100px;
+}
+
+.active-header {
+  width: 50%;
+  border-bottom: 4px solid var(--table-header-bg-color);
+  cursor: pointer;
+  
+}
+
+.not_active {
+  cursor: pointer;
+  width: 50%;
+  color: #898989;
+  border-bottom: 4px solid #fbf8f8;
+}
+
+.not_active :hover {
+  color: black;
+}
+
+.status {
+  width: 100%;
+  display: flex;
+  padding-left: 130px;
+}
+
+.status h6 {
+  margin-top: 5%;
+  width: 33.33%;
+}
+
+#progressbar {
+  margin-bottom: 30px;
+  overflow: hidden;
+  color: #455a64;
+  padding-left: 0px;
+  margin-top: 30px;
+  padding-left: 100px;
+}
+
+#progressbar li {
+  list-style-type: none;
+  font-size: 13px;
+  width: 33.33%;
+  float: left;
+  position: relative;
+  font-weight: 400;
+  color: #686868 !important;
+}
+
+#progressbar #step1:before {
+  content: "1";
+  color: #fff;
+  width: 29px;
+  margin-left: 15px !important;
+  padding-left: 11px !important;
+ 
+}
+#log{
+  text-align: center;
+}
+#progressbar #step2:before {
+  content: "2";
+  color: #fff;
+  width: 29px;
+}
+
+#progressbar #step3:before {
+  content: "3";
+  color: #fff;
+  width: 29px;
+  margin-right: 15px !important;
+  padding-right: 11px !important;
+}
+
+#progressbar li:before {
+  line-height: 29px;
+  display: block;
+  font-size: 12px;
+  background: #686868;
+  border-radius: 50%;
+  margin: auto;
+}
+h1{
+  color: grey;
+  margin-left: 50px;
+  text-align: center;
+}
+#progressbar li:after {
+  content: "";
+  width: 121%;
+  height: 2px;
+  background: #686868;
+  position: absolute;
+  left: 0%;
+  right: 0%;
+  top: 15px;
+  z-index: -1;
+}
+
+#progressbar li:nth-child(2):after {
+  left: 50%;
+}
+
+#progressbar li:nth-child(1):after {
+  left: 25%;
+  width: 121%;
+}
+
+#progressbar li:nth-child(3):after {
+  left: 25% !important;
+  width: 50% !important;
+}
+
+#progressbar li.active:before,
+#progressbar li.active:after {
+  background: #D7DF21;
+}
+
+.logout {
+  margin-left: 400px;
+  bottom: 0;
+}
+
+@media (min-width: 320px) and (max-width: 765px) {
+  .status {
+    width: 100%;
+    display: flex;
+  }
+
+  div.scroll {
+  }
+
+  .active {
+    width: 94%;
+  }
+
+  .mobile_form {
+    width: 94%;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .title {
+    margin-left: 0%;
+    
+  }
+
+  .mobile_status {
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  }
+
+  .mobileDiv {
+    width: 97%;
+    margin: 0 auto;
+  }
+
+  .status h6 {
+    margin-top: 5%;
+    width: 33.33%;
+    font-size: 13px;
+  }
+
+  .top-header {
+    margin-bottom: 10px;
+  }
+
+  .top-header h5 {
+    font-size: 15px;
+  }
+
+  #progressbar {
+    margin-bottom: 20px;
+    overflow: hidden;
+    color: #455a64;
+    padding-left: 0px;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  #progressbar li {
+    list-style-type: none;
+    font-size: 13px;
+    width: 33.33%;
+    float: left;
+    position: relative;
+    font-weight: 400;
+    color: #686868 !important;
+    margin-bottom: 12px;
+  }
+  #items{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    border: 2px solid red;
+    padding-top: 100px;
+  }
+}
+
+.items{
+  text-align: left;
+  position: relative;
+  width: 100%;
+  margin: 10px;
+  top: 20px;
+  
+}
+.sidebarItems
+.items a{
+  
+  color: var(--text-color-white);
+  text-align: left;
+  position: relative;
+  width: 100%;
+  margin: 10px;
+  top: 200px;
+  
+}
+
+.navbar{
+  border: 1px solid blueviolet;
+  position: fixed;
+  background-color: var(--topbar-bg-color);
+  
+}
+
+nav .user {
+  display: flex;
+  align-items: center;
+}
+
