@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Incident;
+use App\Models\Technician;
 use Illuminate\Http\Request;
 
 class IncidentController extends Controller
@@ -85,5 +86,30 @@ class IncidentController extends Controller
         $ticket->full_name = $ticket->user->first_name . ' ' . $ticket->user->last_name;
 
         return response()->json($ticket);
+    }
+
+    public function index()
+    {
+        // Fetch all incidents and available technicians
+        $incidents = Incident::whereNull('technician_id')->get();
+        $technicians = Technician::all();
+
+        return view('admin.incidents', compact('incidents', 'technicians'));
+    }
+
+    public function assignTechnician(Request $request, $tick_id)
+    {
+        // Validate request
+        $request->validate([
+            'technician_id' => 'required|exists:technician,technician_id',
+        ]);
+
+        // Find the incident and update the technician assignment
+        $incident = Incident::findOrFail($tick_id);
+        $incident->technician_id = $request->technician_id;
+        $incident->status = 'LOGGED'; // Optional: Update status
+        $incident->save();
+
+        return redirect()->back()->with('success', 'Technician assigned successfully!');
     }
 }

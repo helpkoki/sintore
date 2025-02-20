@@ -22,6 +22,13 @@
         </nav>
     </div>
 
+    @if(session('status'))
+        <div class="alert alert-success">
+            {{ session('status') }}
+        </div>
+    @endif
+
+
     
     <!-- top bar -->
     <div class="topbar">
@@ -30,6 +37,7 @@
             <div class="deco"></div>
         </nav>
      </div>
+
 
     <!-- Main Content -->
     <div class="main-content">
@@ -76,8 +84,11 @@
                         <input type="radio" name="status" value="User" required>
                     </label>
                 </div>
+
                 <div class="login-container">
                 <div class="input-group">
+
+                    
                     <label class="input-label" for="emailAddress">Email:</label>
                     <div class="input-container">
                     <input type="email" id="emailAddress" name="emailAddress" class="input-field" required>

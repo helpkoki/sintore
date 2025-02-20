@@ -3,7 +3,16 @@
 @section('title', 'Technician Dashboard - Tekete Management System')
 
 @push('styles')
-    <link href="{{ asset('css/serviceProvider.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/serviceProvider.css') }}" rel="stylesheet">
+        <style>
+            .content {
+                 margin-left: 100px;
+                  margin-top: 60px;
+                       padding: 1rem;
+                   overflow-x: hidden;
+                 transition: margin-left 0.3sease;
+    }
+        </style>
 @endpush
 
 @section('content')
@@ -49,7 +58,7 @@
 </div>
 
 <!-- Include Ticket & Escalation Modals -->
-@include('technician.ticket_modal')
+{{-- @include('technician.ticket_modal') --}}
 @include('technician.escalation_modal')
 
 @endsection

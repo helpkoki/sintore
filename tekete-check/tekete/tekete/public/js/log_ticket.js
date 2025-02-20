@@ -17,6 +17,17 @@
     document.getElementById("date").value = datestring;
     document.getElementById("date2").value = datestring;
   });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let dateField = document.getElementById("date");
+    if (dateField) {
+        let today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD format
+        dateField.value = today;
+    } else {
+        console.error("Element with ID 'date' not found.");
+    }
+});
+
   
   function clearField() {
     document.getElementById("operating-system").value = "";
@@ -104,3 +115,13 @@
     document.getElementById("side5").style.display = "none";
   }
   
+   function toggleOtherField() {
+        var description = document.getElementById("description").value;
+        var otherField = document.getElementById("other_te");
+        
+        if (description === "Other") {
+            otherField.style.display = "table-row";
+        } else {
+            otherField.style.display = "none";
+        }
+    }

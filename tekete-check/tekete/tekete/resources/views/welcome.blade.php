@@ -197,6 +197,7 @@
         .about-section {
             padding: 40px 20px;
             background-color: var(--background-light);
+            background-image: 
         }
 
         .about-section h2 {
@@ -212,13 +213,16 @@
 </head>
 <body>
     <header>
-        <!-- <div class="logo">
-            <img src="logo-placeholder.png" alt="Tekete Logo">
+        <div class="logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Tekete Logo">
             <span>Tekete</span>
-        </div> -->
+        </div> 
+        {{-- <div class="text-center mb-3">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" style="width: 70px; height: 70px;">
+        </div> --}}
         <nav>
             <a href="#">Home</a>
-            <a href="#">Features</a>
+            <a href="#features">Features</a>
             <a href="#">Services</a>
             <a href="#">Contact</a>
         </nav>
@@ -233,7 +237,7 @@
                 <a href="{{ route('register') }}" class="cta-button">Register</a>
             </div>
         </div>
-        <!-- <img src="illustration-placeholder.png" alt="Customer Support Illustration"> -->
+     <img src="{{asset('images/technician.png')}}" alt="Customer Support Illustration"> 
     </section>
 
     <section class="about-section">
@@ -246,7 +250,7 @@
         </p>
     </section>
 
-    <section class="features">
+    <section  id="features" class="features">
         <div class="feature">
             <h3>Forgotten Passwords</h3>
             <p>Quickly address issues like forgotten passwords and slow performance.</p>

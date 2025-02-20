@@ -54,6 +54,7 @@ $(document).ready(function () {
         $('body').removeClass('modal-open');
         $(this).find('form').trigger('reset');
     });
+    
 });
 
 function forceShowEscalationModal(ticketId) {
@@ -86,6 +87,10 @@ function forceShowEscalationModal(ticketId) {
         keyboard: false
     });
 
+     $('.modal .close, .modal .btn-secondary').on('click', function() {
+        $('#escalationModal').modal('hide');
+        $('#ticketModal').modal('hide');
+    });
     // Backup method: Ensure modal is forcefully displayed after 200ms
     setTimeout(() => {
         if (!$modal.hasClass('show')) {

@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\TechnicianAuthController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\TechnicianController;
-use App\Http\Controllers\User\getUserDetailsController;
-use App\Http\Controllers\User\TrackTicketController;
-use App\Http\Controllers\User\LogTicketController;
-use App\Models\Technician;
 use App\Models\User;
+use App\Models\Technician;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\TechnicianController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\User\LogTicketController;
+use App\Http\Controllers\User\TrackTicketController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\User\getUserDetailsController;
 
 
 /*
@@ -36,9 +37,19 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Update these routes in web.php
+Route::get('/login', [LoginController::class, 'showLoginForm'])
+    ->name('login')
+    ->middleware('web', 'guest');
+
+Route::post('/login', [LoginController::class, 'login'])
+    ->name('login')
+    ->middleware('web');
+
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->name('logout')
+    ->middleware('web');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -71,6 +82,11 @@ Route::middleware(['auth:technician'])->group(function () {
     Route::get('/technician/completed', [TechnicianController::class, 'completed'])->name('technician.completed');
 
     Route::post('/technician/ticket/{id}/escalate', [TechnicianController::class, 'escalateTicket']);
+
+    //update technician
+    Route::get('/technician/{id}/edit', [TechnicianController::class, 'edit'])->name('technician.update');
+    Route::get('/technicians/{id}/edit', [TechnicianController::class, 'edit'])->name('technician.edit');
+    Route::put('/technicians/{id}', [TechnicianController::class, 'update'])->name('technician.update');
   
 });
 
@@ -81,3 +97,8 @@ Route::post('/log_ticket', [LogTicketController::class, 'handleFormSubmission'])
 Route::get('/track_ticket', [TrackTicketController::class, 'index'])->name('track_ticket');
 
 
+//admin routes
+Route::get('/admin/Adminhome', [AdminController::class, 'AdminHome'])->name('admin.admin-home');
+Route::get('/admin/incidents', [IncidentController::class, 'index'])->name('admin.incidents');
+Route::post('/admin/incidents/assign/{tick_id}', [IncidentController::class, 'assignTechnician'])->name('admin.assignTechnician');
+Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('dashboard');

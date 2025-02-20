@@ -3,7 +3,40 @@
 @section('title', 'Technician Dashboard - Tekete Management System')
 
 @push('styles')
-    <link href="{{ asset('css/serviceProvider.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('css/serviceProvider.css') }}" rel="stylesheet"> --}}
+    <style>
+    .table thead>tr>th {
+    background-color: #d4d414;
+    /* Yellow header */
+    color: #666;
+    /* Dark gray text */
+    font-weight: bold;
+    }
+
+    .table th,
+    .table td {
+    text-align: center;
+    }
+
+    /* Dropdown Styling */
+    select.form-control {
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    }
+
+    h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    }
+
+    .content {
+    margin-left: 110px;
+    margin-top: 60px;
+    padding: 1rem;
+    }
+    </style>
 @endpush
 
 @section('content')
@@ -51,7 +84,7 @@
 
 <!-- Include Ticket & Escalation Modals -->
 <!-- Modal containers -->
-@include('technician.escalation_modal')
+{{-- @include('technician.escalation_modal') --}}
 @include('technician.ticket_modal')
 @endsection
 

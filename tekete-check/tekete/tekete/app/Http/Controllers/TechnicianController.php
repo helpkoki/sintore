@@ -222,5 +222,30 @@ class TechnicianController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $technician = Technician::findOrFail($id); // Retrieve technician by ID
+
+        return view('technician.update', compact('technician')); // Pass it to the view
+    }
+    public function update(Request $request, $id)
+    {
+        $technician = Technician::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:50|unique:technician,email,' . $id . ',technician_id',
+            'mobile' => 'nullable|string|max:20',
+            'level' => 'nullable|integer',
+        ]);
+
+        // Remove empty fields to avoid overriding existing values
+        $filteredData = array_filter($validatedData, fn($value) => !is_null($value));
+
+        $technician->update($filteredData);
+
+        return redirect()->route('technician.edit', $id)->with('success', 'Technician updated successfully');
+    }
 
 }

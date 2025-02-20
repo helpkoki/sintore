@@ -52,19 +52,67 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
+    public function logout(Request $request)
+    {
+        // Store the current guard name before logging out
+        $currentGuard = null;
+        if (Auth::guard('admin')->check()) {
+            $currentGuard = 'admin';
+            Auth::guard('admin')->logout();
+        } elseif (Auth::guard('technician')->check()) {
+            $currentGuard = 'technician';
+            Auth::guard('technician')->logout();
+        } else {
+            $currentGuard = 'web';
+            Auth::logout();
+        }
+
+        // Clear session data
+        $request->session()->forget([
+            'email',
+            'user_id',
+            'name',
+            'company_id'
+        ]);
+
+        // Invalidate and regenerate session
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Clear any remaining authentication data for all guards
+        Auth::guard('admin')->forgetUser();
+        Auth::guard('technician')->forgetUser();
+        Auth::guard('web')->forgetUser();
+
+        return redirect('/login')->with([
+            'status' => 'You have been logged out successfully',
+            'previous_guard' => $currentGuard
+        ]);
+    }
+
     public function login(Request $request)
     {
+        // Clear any lingering authentication data first
+        Auth::guard('admin')->forgetUser();
+        Auth::guard('technician')->forgetUser();
+        Auth::guard('web')->forgetUser();
+
         // Validate the incoming data
         $request->validate([
             'emailAddress' => 'required',
             'password' => 'required',
-            'status' => 'required|in:admin,Technician,User', // Ensure user status is selected
+            'status' => 'required|in:admin,Technician,User',
         ]);
 
-        // Extract status and credentials from the request
+        // Extract status and credentials
         $status = $request->input('status');
         $email = $request->input('emailAddress');
         $password = $request->input('password');
+
+        // Ensure session is started fresh
+        if (!$request->session()->isStarted()) {
+            $request->session()->start();
+        }
 
         // Call appropriate login method based on status
         switch ($status) {
@@ -81,15 +129,15 @@ class LoginController extends Controller
 
 
     // Admin login method
-private function adminLogin($admin_no, $password)
-{
-    $admin = Company::where('admin_no', $admin_no)->first();
+    private function adminLogin($admin_no, $password)
+    {
+        $admin = Company::where('admin_no', $admin_no)->first();
 
-    if (!$admin) {
-        return back()->withErrors(['emailAddress' => 'Admin number not found'])->withInput();
-    }
+        if (!$admin) {
+            return back()->withErrors(['emailAddress' => 'Admin number not found'])->withInput();
+        }
 
-       // Debugging output
+        // Debugging output
         // dd([
         //     'admin_no' => $admin_no,
         //     'raw_password_provided' => $password,
@@ -101,110 +149,117 @@ private function adminLogin($admin_no, $password)
         //     'hash_length' => strlen($admin->password)
         // ]);
 
-    // Case 1: Password is already in bcrypt format
-    if ($admin->password_updated) {
-        if (Hash::check($password, $admin->password)) {
-            Auth::guard('admin')->login($admin);
-            session()->flash('loginSuccess', 'Welcome Administrator! You have successfully logged in.');
-            return redirect()->intended(route('adminpage'));
+        // Case 1: Password is already in bcrypt format
+        if ($admin->password_updated) {
+            if (Hash::check($password, $admin->password)) {
+                Auth::guard('admin')->login($admin);
+                session()->flash('loginSuccess', 'Welcome Administrator! You have successfully logged in.');
+                // return redirect()->intended(route('admin.admin-home'));
+                // return route('admin.admin-home');
+                return redirect()->route('admin.admin-home');
+
+            }
         }
-    }
-    // Case 2: Password is in MD5 format and needs upgrade
-    else if (strlen($admin->password) === 32 && md5($password) === $admin->password) {
-        if ($this->upgradeAdminPassword($admin, $password)) {
-            Auth::guard('admin')->login($admin);
-            session()->flash('loginSuccess', 'Welcome Administrator! You have successfully logged in.');
-            return redirect()->intended(route('adminpage'));
+        // Case 2: Password is in MD5 format and needs upgrade
+        else if (strlen($admin->password) === 32 && md5($password) === $admin->password) {
+            if ($this->upgradeAdminPassword($admin, $password)) {
+                Auth::guard('admin')->login($admin);
+                session()->flash('loginSuccess', 'Welcome Administrator! You have successfully logged in.');
+                // return redirect()->intended(route('admin.admin-home'));
+                return redirect()->route('admin.admin-home');
+            }
         }
+
+        // If we get here, authentication failed
+        return back()->withErrors(['emailAddress' => 'Invalid password'])->withInput();
     }
 
-    // If we get here, authentication failed
-    return back()->withErrors(['emailAddress' => 'Invalid password'])->withInput();
-}
+    private function upgradeAdminPassword($admin, $password)
+    {
+        DB::beginTransaction();
+        try {
+            // Hash the password using bcrypt
+            $hashedPassword = Hash::make($password);
 
-private function upgradeAdminPassword($admin, $password)
-{
-    DB::beginTransaction();
-    try {
-        // Hash the password using bcrypt
-        $hashedPassword = Hash::make($password);
-        
-        // Update the admin's password and mark it as updated
-        $admin->password = $hashedPassword;
-        $admin->password_updated = true;
-        
-        if (!$admin->save()) {
-            throw new \Exception('Failed to save new password');
-        }
-        
-        DB::commit();
-        return true;
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Failed to upgrade admin password: ' . $e->getMessage());
-        return false;
-    }
-}
+            // Update the admin's password and mark it as updated
+            $admin->password = $hashedPassword;
+            $admin->password_updated = true;
 
-//Service Provider
-private function technicianLogin($email, $password)
-{
-    // Fetch the technician using their email
-    $technician = Technician::where('email', $email)->first();
+            if (!$admin->save()) {
+                throw new \Exception('Failed to save new password');
+            }
 
-    if (!$technician) {
-        return back()->withErrors(['emailAddress' => 'Technician email not found'])->withInput();
-    }
-
-    // Debugging (optional)
-    // dd($technician, Hash::check($password, $technician->password));
-
-    // Case 1: Password is already in bcrypt format
-    if ($technician->password_updated) {
-        if (Hash::check($password, $technician->password)) {
-            // Authenticate using the 'technician' guard
-            Auth::guard('technician')->login($technician);
-            session()->flash('loginSuccess', 'Welcome Service Provider! You have successfully logged in.');
-            return redirect()->intended(route('technician.logged'));
-        }
-    }
-    // Case 2: Password is in MD5 format and needs upgrade
-    elseif (strlen($technician->password) === 32 && md5($password) === $technician->password) {
-        if ($this->upgradeTechnicianPassword($technician, $password)) {
-            Auth::guard('technician')->login($technician);
-            session()->flash('loginSuccess', 'Welcome Service Provider! You have successfully logged in.');
-            return redirect()->intended(route('technician.logged'));
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to upgrade admin password: ' . $e->getMessage());
+            return false;
         }
     }
 
-    // If we get here, authentication failed
-    return back()->withErrors(['emailAddress' => 'Invalid password'])->withInput();
-}
+    //Service Provider
+    private function technicianLogin($email, $password)
+    {
+        // Fetch the technician using their email
+        $technician = Technician::where('email', $email)->first();
 
-
-private function upgradeTechnicianPassword($technician, $password)
-{
-    DB::beginTransaction();
-    try {
-        // Hash the password using bcrypt
-        $hashedPassword = Hash::make($password);
-        
-        // Update the technician's password and mark it as updated
-        $technician->password = $hashedPassword;
-        $technician->password_updated = true;
-        
-        if (!$technician->save()) {
-            throw new \Exception('Failed to save new password');
+        if (!$technician) {
+            return back()->withErrors(['emailAddress' => 'Technician email not found'])->withInput();
         }
-        
-        DB::commit();
-        return true;
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Failed to upgrade technician password: ' . $e->getMessage());
-        return false;
+
+        // Debugging (optional)
+        // dd($technician, Hash::check($password, $technician->password));
+
+        // Case 1: Password is already in bcrypt format
+        if ($technician->password_updated) {
+            if (Hash::check($password, $technician->password)) {
+                // Authenticate using the 'technician' guard
+                Auth::guard('technician')->login($technician);
+                session()->flash('loginSuccess', 'Welcome Service Provider! You have successfully logged in.');
+
+                return redirect()->route('technician.logged');
+            }
+        }
+        // Case 2: Password is in MD5 format and needs upgrade
+        elseif (strlen($technician->password) === 32 && md5($password) === $technician->password) {
+            if ($this->upgradeTechnicianPassword($technician, $password)) {
+                Auth::guard('technician')->login($technician);
+                session()->flash('loginSuccess', 'Welcome Service Provider! You have successfully logged in.');
+                
+                return redirect()->route('technician.');
+            }
+        }
+
+        // // If we get here, authentication failed
+        return back()->withErrors(['emailAddress' => 'Invalid password'])->withInput();
+        // return "Invalid password";
     }
-}
+
+
+    private function upgradeTechnicianPassword($technician, $password)
+    {
+        DB::beginTransaction();
+        try {
+            // Hash the password using bcrypt
+            $hashedPassword = Hash::make($password);
+
+            // Update the technician's password and mark it as updated
+            $technician->password = $hashedPassword;
+            $technician->password_updated = true;
+
+            if (!$technician->save()) {
+                throw new \Exception('Failed to save new password');
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to upgrade technician password: ' . $e->getMessage());
+            return false;
+        }
+    }
 
 
     // User login method
@@ -218,15 +273,15 @@ private function upgradeTechnicianPassword($technician, $password)
 
         if (Hash::check($password, $user->password)) {
             Auth::login($user);
-            
+
             // Store essential user data in session
             Session::put('email', $user->email);
             Session::put('user_id', $user->user_id);
             Session::put('name', $user->first_name . ' ' . $user->last_name);
             Session::put('company_id', $user->company_id);
-            
+
             session()->flash('loginSuccess', 'Welcome User! You have successfully logged in.');
-            return redirect()->intended(route('log_ticket.create'));
+            return redirect()->route('log_ticket.create');
         }
 
         return back()->withErrors(['emailAddress' => 'Invalid password'])->withInput();
@@ -239,14 +294,6 @@ private function upgradeTechnicianPassword($technician, $password)
         return redirect()->route('log_ticket.create');
     }
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        Session::flush();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        
-        return redirect('/login')->with('status', 'You have been logged out successfully');
-    }
+
 
 }
